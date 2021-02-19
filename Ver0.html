@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="UTF-8"/>
+<style>
+button.button{
+    border:2px solid; 
+    border-radius:25px;
+    width:100px;
+    height:40px;
+}
+</style>
+    </head>
+    <body>
+        <h3 id="logger"><h3>
+        <canvas id="c" width="400px" height="400px"></canvas>
+        <div><!--buttons-->
+<button type="button" class="button" onClick="javascript:hea=Array(0,-1)">up</button> <button type="button" class="button" onClick="javascript:hea=Array(0,1)">down</button>
+<br/>
+<button type="button" class="button" onClick="javascript:hea=Array(-1,0)">left</button> <button type="button" class="button" onClick="javascript:hea=Array(1,0)">right</button>
+<br/>
+<!--
+<button type="button" class="button" onClick="javascript:re=1-re">作弊</button><button type="button" class="button" onClick="javascript:len+=10">加10</button>
+-->
+        <script>
+logx=function(str){document.getElementById("logger").innerHTML=document.getElementById("logger").innerHTML+str+"<br/>";};
+            const mapw=20;
+            const maph=20;
+            const w=400;
+            const h=400;
+            var drawb=function(x,y){
+                const ctx=document.getElementById("c").getContext("2d");
+                ctx.fillStyle="rgb(0,0,0)";
+                ctx.fillRect(w*x/mapw,h*y/maph,w/mapw,h/maph);
+            };
+            var drawg=function(x,y){
+                const ctx=document.getElementById("c").getContext("2d");
+                ctx.fillStyle="rgb(255,255,0)";
+                ctx.fillRect(w*x/mapw,h*y/maph,w/mapw,h/maph);
+            };
+            var clearx=function(){
+                const ctx=document.getElementById("c").getContext("2d");
+                for (var i=0;i<mapw;i++){
+                    for (var j=0;j<maph;j++){
+                        ctx.fillStyle="rgb("+String(Math.floor(i*255/mapw))+","+String(Math.floor(j*255/maph))+",255)";
+                        ctx.fillRect(w*i/mapw,h*j/maph,w/mapw,h/maph);
+                    };
+                };
+            };
+            clearx();
+            var map_=Array(mapw);
+            for (var i=0;i<mapw;i++){
+                map_[i]=Array(maph);
+                for (var j=0;j<maph;j++){
+                    map_[i][j]=0;
+                }
+            }
+            map_[0][0]=1;
+            map_[0][3]=-1;
+//logx(map_)
+            var he=Array(0,0);
+            var hea=Array(0,1);
+            var len=1;
+            var gameover=false;
+            var doGO=function(){
+                gameover=true;
+                logx("gameover,score:"+String(len));
+            };
+//logx(doGO);
+var re=0;
+var reset=function(){
+if (re==0)return 1;
+if (he[0]==0 && he[1]==0){hea=Array(0,1);return 0;}
+if (he[0]==0 && he[1]==maph-1){hea=Array(1,0);return 0;}
+if (he[0]==1 && he[1]>0 && he[1]<maph-1){
+if (he[1]%2==1)hea=Array(1,0);
+else hea=Array(0,-1);
+return 0;
+}
+if (he[0]==mapw-1){
+if (he[1]%2==0) hea=Array(-1,0);
+else hea=Array(0,-1);
+}
+};//用于作弊，调整方向
+var loop=function(){
+he[0]%=mapw;he[1]%=maph;
+if (he[0]<0)he[0]+=mapw;
+if (he[1]<0)he[1]+=maph;
+}
+            var run=function(){
+                //logx(map_);
+                reset();
+                if (gameover)return 1;
+                he[0]=he[0]+hea[0];he[1]=he[1]+hea[1];
+loop();
+                if (he[0]>=mapw||he[1]>=maph||he[0]<0||he[1]<0){
+                    gameover=true;
+                    doGO();
+                }
+                if (map_[he[0]][he[1]]==0){
+                    for (var i=0;i<mapw;i++){
+                        for (var j=0;j<maph;j++){
+                            if (map_[i][j]>0){
+                                map_[i][j]--;
+                            }
+                        }
+                    }
+                    map_[he[0]][he[1]]=len;
+                }else if (map_[he[0]][he[1]]==-1){
+                    len++;
+                    map_[he[0]][he[1]]=len;
+                    var p,q;
+                    var vic=true;
+                    for (p=0;p<mapw;p++)for(q=0;q<maph;q++)if (map_[p][q]==0)vic=false;
+                    if (vic){
+                        gameover=true;doGO();return 2;
+                    }
+                    while (true){
+                        p=Math.floor(Math.random()*mapw);
+                        q=Math.floor(Math.random()*maph);
+                        if (map_[p][q]==0){
+                            map_[p][q]=-1;
+                            break;
+                        }
+                    }
+                }else if (map_[he[0]][he[1]]>0){
+                    gameover=true;
+                    doGO();
+                }
+                clearx();
+                for (var m=0;m<mapw;m++)for (var n=0;n<maph;n++) if (map_[m][n]>0) drawb(m,n); else if (map_[m][n]==-1) drawg(m,n);
+            }
+            //run();
+            window.setInterval("run()",100);
+        </script>
+    </body>
+</html>
